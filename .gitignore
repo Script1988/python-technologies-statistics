@@ -5,3 +5,5 @@ venv
 *.iml
 .env
 .vscode/
+test.py
+check.ipynb
