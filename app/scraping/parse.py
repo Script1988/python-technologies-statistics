@@ -1,19 +1,19 @@
 import requests
 from bs4 import BeautifulSoup, Tag
 from urllib.parse import urljoin
-
 from app.config import to_find
+
 
 BASE_URL = "https://djinni.co/jobs/"
 PYTHON_DEVELOPER = "?all-keywords=&any-of-keywords=&exclude-keywords=&primary_keyword=Python"
 PAGE = urljoin(BASE_URL, PYTHON_DEVELOPER)
 
 
-def parse_single_vacancy(description: [Tag]) -> None:
-    for i in description:
-        for j in i:
-            j = str(j).replace("<br/>", "").split()
-            for element in j:
+def parse_single_page(description: [Tag]) -> None:
+    for vacancy in description:
+        for words in vacancy:
+            words = str(words).replace("<br/>", "").split()
+            for element in words:
                 element.replace("(", "").replace(")", "")
                 if element in to_find:
                     to_find[element] += 1
@@ -33,14 +33,14 @@ def get_page_info() -> dict:
     soup = BeautifulSoup(page, "html.parser")
     next_page = get_next_page(soup)
     description = soup.select(".text-card")
-    parse_single_vacancy(description)
+    parse_single_page(description)
 
-    # while next_page:
-    #     description = soup.select(".text-card")
-    #     parse_single_vacancy(description)
-    #     page = requests.get(urljoin(PAGE, next_page)).content
-    #     soup = BeautifulSoup(page, "html.parser")
-    #     next_page = get_next_page(soup)
+    while next_page:
+        description = soup.select(".text-card")
+        parse_single_page(description)
+        page_to_get = requests.get(urljoin(PAGE, next_page)).content
+        soup = BeautifulSoup(page_to_get, "html.parser")
+        next_page = get_next_page(soup)
 
     return to_find
 
